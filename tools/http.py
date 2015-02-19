@@ -150,10 +150,11 @@ def normalize_url(url):
     # and check if it is IDN
     if RE_NOT_SAFE_URL.search(url):
         parts = list(urlsplit(url))
-        if RE_NON_ASCII.search(parts[1]):
-            parts[1] = str(smart_unicode(parts[1]).encode('idna').decode())
-            url = urlunsplit(parts)
-            return url
+        # Iterating by netloc, path and params
+        for i in range(1, 4):
+            if RE_NON_ASCII.search(parts[i]):
+                parts[i] = str(smart_unicode(parts[i]).encode('idna').decode())
+        url = urlunsplit(parts)
     return url
 
 
