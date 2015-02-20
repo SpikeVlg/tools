@@ -1,3 +1,4 @@
+import os
 try:
     import urllib.parse as urllib
 except ImportError:
@@ -28,10 +29,21 @@ from tools.py3k_support import *
 # is need to be imported then that can't be done due to the unknown magical influence
 import encodings.punycode
 
+#set_environ()
+print('=======')
+
 logger = logging.getLogger('grab.tools.http')
 RE_NON_ASCII = re.compile(r'[^-.a-zA-Z0-9]')
 RE_NOT_SAFE_URL = re.compile(r'[^-.:/?&;#a-zA-Z0-9]')
+TLD_FILE_NAME = "effective_tld_names.dat.txt"
+path_to_tld = os.path.join(os.path.dirname(os.path.abspath(__file__)), TLD_FILE_NAME)
+os.environ['PUBLIC_SUFFIX_LIST'] = path_to_tld
 
+import urltools
+
+#def set_environ():
+#    path_to_tld = os.path.join(os.path.dirname(os.path.abspath(__file__)), TLD_FILE_NAME)
+#    os.environ['PUBLIC_SUFFIX_LIST'] = path_to_tld
 
 def urlencode(*args, **kwargs):
     logger.debug('Method grab.tools.http.urlencode is deprecated. '
@@ -145,15 +157,19 @@ def quote(data):
 
 
 def normalize_url(url):
+    return urltools.encode(url)
     # The idea is to quick check that URL contains only safe chars
     # If whole URL is safe then there is no need to extract hostname part
     # and check if it is IDN
     if RE_NOT_SAFE_URL.search(url):
         parts = list(urlsplit(url))
+        if RE_NON_ASCII.search(parts[1]):
+                parts[i] = str(smart_unicode(parts[1]).encode('idna').decode())
         # Iterating by netloc, path and params
-        for i in range(1, 4):
+        for i in range(2, 4):
             if RE_NON_ASCII.search(parts[i]):
-                parts[i] = str(smart_unicode(parts[i]).encode('idna').decode())
+                #parts[i] = str(smart_unicode(parts[i]).encode('idna').decode())
+                parts[i] = quote(smart_unicode(parts[i]))
         url = urlunsplit(parts)
     return url
 
