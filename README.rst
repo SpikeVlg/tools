@@ -36,3 +36,4 @@ Dependencies
 * lxml
 * pytils
 * six
+* urltools
