@@ -10,7 +10,7 @@ except ImportError:
 import re
 import logging
 
-from tools.error import RuntimeConfigError
+from tools.error import RuntimeConfigError, InvalidUrlError
 from tools.encoding import smart_str, smart_unicode, decode_pairs
 
 from tools.py3k_support import *
@@ -158,7 +158,11 @@ def quote(data):
 
 
 def normalize_url(url):
-    return urltools.encode(url)
+    try:
+        return urltools.encode(url)
+    except UnicodeError as ex:
+        raise InvalidUrlError('Invalid url: {url}. Base exception: {ex}'.format(
+                              url=url, type=type(ex), ex=ex))
 
 def normalize_post_data(data, charset):
     if isinstance(data, basestring):
