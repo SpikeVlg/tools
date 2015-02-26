@@ -21,10 +21,5 @@ class RuntimeConfigError(ToolsError):
     or conflict with something.
     """
 
-class InvalidUrlError(ToolsError):
-    """
-    Raised when passed invalid url.
-    """
-
 def warn(msg):
     warnings.warn(msg, category=GrabDeprecationWarning, stacklevel=3)
