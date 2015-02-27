@@ -24,3 +24,42 @@ class HttpTestCase(TestCase):
                       'http://www.textbooksnow.com/webapp/wcs/stores'\
                       '/servlet/ProductDisplay?langId=-1&storeId='
         self.assertRaises(InvalidUrlError, normalize_url, invalid_url)
+
+
+if __name__ == '__main__':
+  unittest.main()
+
+"""
+1) Может быть я не понял интерфейса github, но я не увидел, включён ли файл с tld-доменами в один из коммитов. Файл не должен скачиваться, он должен быть в составе библиотеки tools.
+
+2) Тестов нужно больше, нужно протестировать следующие случаи:
+2-0) 192.168.0.1
+2-0) http://192.168.0.1
+2-0) http://999.999.999.999
+2-0) 123.123.123
+2-0) 12345
+2-0) None
+2-0) "" (пустая строка)
+2-1) domain.com
+2-2) domain.foobar
+2-3) domain.com/path
+2-4) domain.com/path?foo=bar
+2-5) /path
+2-6) /path?foo=bar
+2-7) foobar
+2-8) http://domain.com
+2-9) http://domain.foobar
+2-10) asdf://domain.com
+2-11) asdf://domain.foobar
+2-12) http://domain.com/foobar
+2-13) http://domain.foobar/foobar
+2-14) http://domain.com/foobar?foo=bar
+2-15) http://домен.рф
+2-16) http://домен.фубар
+2-17) http://домен.рф/foobar
+2-18) http://домен.рф/фубар
+2-19) http://домен.рф/фубар?foo=bar
+2-20) http://домен.рф/фубар?фуу=бар
+
+Нужно тестироваь буквально эти урлы, это не абстрактные примеры, а конкретные случаи для тестирования. Я без понятия, как будут обработаны некоторые из этих примеров, предлагаю написать тесты и посмотреть :) На каждый тест отдельная функция т.е. не надо 20 проверок в одну фукнцию пихать, надо 20 test_* функций создать.
+"""

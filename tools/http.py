@@ -1,4 +1,8 @@
 import os
+
+import six
+#import six.moves.urllib as urllib
+#from six.moves.urllib import urlsplit
 try:
     import urllib.parse as urllib
 except ImportError:
@@ -10,7 +14,7 @@ except ImportError:
 import re
 import logging
 
-from tools.error import RuntimeConfigError
+from tools.error import RuntimeConfigError, InvalidUrlError
 from tools.encoding import smart_str, smart_unicode
 
 from tools.py3k_support import *
@@ -41,6 +45,7 @@ path_to_tld = os.path.join(os.path.dirname(os.path.abspath(__file__)), TLD_FILE_
 os.environ['PUBLIC_SUFFIX_LIST'] = path_to_tld
 
 import urltools
+import rfc3987
 
 #def set_environ():
 #    path_to_tld = os.path.join(os.path.dirname(os.path.abspath(__file__)), TLD_FILE_NAME)
@@ -158,7 +163,27 @@ def quote(data):
 
 
 def normalize_url(url):
-    return urltools.encode(url)
+    try:
+        encoded_url = urltools.encode(url)
+        encoded_url = encoded_url.lstrip('.')
+        # validate url
+        #rfc3987.parse(encoded_url)
+        regex = re.compile(
+            r'^(?:http|ftp)s?://' # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' # domain...
+            r'localhost|' # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|' # ...or ipv4
+            r'((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|'
+            r'\[?[A-F0-9]*:[A-F0-9:]+\]?)' # ...or ipv6
+            r'(?::\d+)?' # optional port
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+        if regex.match(encoded_url) is None:
+            raise InvalidUrlError('Invalid url %s' % encoded_url)
+        return encoded_url
+    except InvalidUrlError as ex:
+        raise ex
+    except Exception as ex:
+        six.reraise(InvalidUrlError, InvalidUrlError(ex), sys.exc_info()[2])
 
 
 def normalize_post_data(data, charset):
